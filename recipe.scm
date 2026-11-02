@@ -1,6 +1,7 @@
 (module recipe
   (recipe scale-recipe recipe->sxml recipe->html
-   recipe? recipe-name recipe-servings recipe-ingredients recipe-steps)
+   recipe? recipe-name recipe-servings recipe-ingredients recipe-steps
+   make-ingredient make-cookware make-timer)
 
   (import scheme
           (chicken base)
@@ -9,100 +10,110 @@
           (chicken port)
           srfi-1)
 
-  ;; Allow the actual λ character as a synonym for lambda
   (define-syntax λ
     (syntax-rules ()
       ((_ . rest) (lambda . rest))))
 
-  ;; Records
+  ;; Quantity: number/range + unit + locked?
+  (define-record-type quantity
+    (make-quantity value unit locked?)
+    quantity?
+    (value quantity-value)
+    (unit quantity-unit)
+    (locked? quantity-locked?))
+
+  ;; Ingredient with Cooklang-like flags
+  (define-record-type ingredient
+    (make-ingredient name quantity optional? hidden? alias reference?)
+    ingredient?
+    (name ingredient-name)
+    (quantity ingredient-quantity)
+    (optional? ingredient-optional?)
+    (hidden? ingredient-hidden?)
+    (alias ingredient-alias)
+    (reference? ingredient-reference?))
+
+  (define-record-type cookware
+    (make-cookware name optional?)
+    cookware?
+    (name cookware-name)
+    (optional? cookware-optional?))
+
+  (define-record-type timer
+    (make-timer name duration unit)
+    timer?
+    (name timer-name)
+    (duration timer-duration)
+    (unit timer-unit))
+
   (define-record-type recipe
-    (make-recipe name servings ingredients steps)
+    (make-recipe name servings metadata ingredients cookware timers steps sections)
     recipe?
     (name recipe-name)
     (servings recipe-servings)
+    (metadata recipe-metadata)
     (ingredients recipe-ingredients)
-    (steps recipe-steps))
+    (cookware recipe-cookware)
+    (timers recipe-timers)
+    (steps recipe-steps)
+    (sections recipe-sections))
 
-  ;; Helpers for quantities
+  ;; Helpers
   (define (quantity-numeric? q)
-    (and (pair? q) (number? (cadr q))))
+    (and (quantity? q) (number? (quantity-value q))))
 
   (define (scale-quantity q factor)
-    (cond
-      ((quantity-numeric? q)
-       (list (car q) (* (cadr q) factor)))
-      (else q)))  ; pinch, to-taste, etc. stay the same
+    (if (or (not q) (quantity-locked? q) (not (quantity-numeric? q)))
+        q
+        (make-quantity (* (quantity-value q) factor)
+                       (quantity-unit q)
+                       #f)))
 
-  ;; Scaling
   (define (scale-recipe r factor)
     (make-recipe
       (recipe-name r)
       (* (recipe-servings r) factor)
+      (recipe-metadata r)
       (map (λ (ing)
-             (cons (car ing)
-                   (scale-quantity (cdr ing) factor)))
+             (make-ingredient (ingredient-name ing)
+                              (scale-quantity (ingredient-quantity ing) factor)
+                              (ingredient-optional? ing)
+                              (ingredient-hidden? ing)
+                              (ingredient-alias ing)
+                              (ingredient-reference? ing)))
            (recipe-ingredients r))
-      (recipe-steps r)))
+      (recipe-cookware r)
+      (recipe-timers r)
+      (recipe-steps r)
+      (recipe-sections r)))
 
-  ;; Macro: ingredients
+  ;; Macros for construction (idiomatic Scheme)
   (define-syntax ingredients
-    (er-macro-transformer
-     (λ (form rename compare)
-       (let ((pairs (cdr form)))
-         (unless (every (λ (p)
-                          (and (list? p)
-                               (= (length p) 2)
-                               (string? (car p))))
-                        pairs)
-           (syntax-error 'ingredients
-                         "expected (\"name\" quantity) pairs"
-                         form))
-         `(list ,@(map (λ (p)
-                         `(cons ,(car p) ,(cadr p)))
-                       pairs))))))
-
-  ;; Macro: steps (just collect strings)
-  (define-syntax steps
     (syntax-rules ()
-      ((_ s ...)
-       (list s ...))))
+      ((_ (name . rest) ...)
+       (list (make-ingredient name . rest) ...))))
 
-  ;; Macro: recipe
   (define-syntax recipe
-    (er-macro-transformer
-     (λ (form rename compare)
-       (let ((name (cadr form))
-             (rest (cddr form)))
-         ;; very simple extraction — improve later
-         (let loop ((rest rest)
-                    (servings 1)
-                    (ings '())
-                    (stps '()))
-           (if (null? rest)
-               `(make-recipe ,name ,servings ,ings ,stps)
-               (let ((clause (car rest)))
-                 (cond
-                   ((and (pair? clause) (eq? (car clause) 'servings))
-                    (loop (cdr rest) (cadr clause) ings stps))
-                   ((and (pair? clause) (eq? (car clause) 'ingredients))
-                    (loop (cdr rest) servings (cadr clause) stps))
-                   ((and (pair? clause) (eq? (car clause) 'steps))
-                    (loop (cdr rest) servings ings (cadr clause)))
-                   (else
-                    (syntax-error 'recipe "unknown clause" clause))))))))))
+    (syntax-rules ()
+      ((_ name (servings n) (ingredients ings) (steps stps))
+       (make-recipe name n '() ings '() '() stps '()))
+      ((_ name (servings n) (ingredients ings) (cookware cws) (timers tms) (steps stps))
+       (make-recipe name n '() ings cws tms stps '()))))
 
-  ;; SXML generation (simple)
+  ;; Simple HTML
   (define (quantity->sxml q)
-    (cond
-      ((quantity-numeric? q)
-       `(span ,(number->string (cadr q)) " " ,(symbol->string (car q))))
-      ((symbol? q)
-       `(span ,(symbol->string q)))
-      (else
-       `(span ,(format "~a" q)))))
+    (if (not q) ""
+        `(span ,(if (number? (quantity-value q))
+                    (number->string (quantity-value q))
+                    (format "~a" (quantity-value q)))
+               " " (or (quantity-unit q) "")
+               ,(if (quantity-locked? q) " (fixed)" ""))))
 
   (define (ingredient->sxml ing)
-    `(li ,(car ing) ": " ,(quantity->sxml (cdr ing))))
+    `(li ,(if (ingredient-optional? ing) "(optional) " "")
+         ,(or (ingredient-alias ing) (ingredient-name ing))
+         ": " ,(quantity->sxml (ingredient-quantity ing))
+         ,(if (ingredient-hidden? ing) " (hidden)" "")))
 
   (define (recipe->sxml r)
     `(article
@@ -113,19 +124,16 @@
        (h2 "Steps")
        (ol ,@(map (λ (s) `(li ,s)) (recipe-steps r)))))
 
-  ;; Very simple HTML emitter (no escaping for skeleton)
   (define (sxml->html s)
     (cond
       ((string? s) s)
       ((number? s) (number->string s))
       ((symbol? s) (symbol->string s))
       ((pair? s)
-       (let ((tag (car s))
-             (body (cdr s)))
-         (string-append
-          "<" (symbol->string tag) ">"
-          (string-concatenate (map sxml->html body))
-          "</" (symbol->string tag) ">")))
+       (let ((tag (car s)) (body (cdr s)))
+         (string-append "<" (symbol->string tag) ">"
+                        (string-concatenate (map sxml->html body))
+                        "</" (symbol->string tag) ">")))
       (else "")))
 
   (define (recipe->html r)
