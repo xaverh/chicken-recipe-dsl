@@ -1,20 +1,22 @@
 open Recipe
 
-let spaghetti = [%recipe
-  "Spaghetti al pomodoro"
-  (servings 4.0)
-  (ingredients
-    ("spaghetti" (g 500.0))
-    ("tomato purée" (ml 250.0))
-    ("salt" pinch)
-    ("basil" (g 10.0)))
-  (steps
-    "Bring a large pot of water to a boil and salt it."
-    "Cook the spaghetti according to package directions."
-    "Heat the tomato purée in a pan."
-    "Drain the pasta and combine with the sauce."
-    "Season and serve with fresh basil.")
-]
+let spaghetti = [%recipe {|
+Spaghetti al pomodoro
+Servings: 4
+
+Ingredients:
+- 500 g spaghetti
+- 250 ml tomato purée
+- pinch salt
+- 10 g basil
+
+Steps:
+1. Bring a large pot of water to a boil and salt it.
+2. Cook the spaghetti according to package directions.
+3. Heat the tomato purée in a pan.
+4. Drain the pasta and combine with the sauce.
+5. Season and serve with fresh basil.
+|}]
 
 let () =
   print_endline "Original:";

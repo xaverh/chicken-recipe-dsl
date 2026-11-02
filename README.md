@@ -1,19 +1,25 @@
-# Recipe DSL — OCaml branch (with PPX)
+# Recipe DSL — OCaml branch (natural PPX syntax)
 
-Uses a custom PPX rewriter so you can write recipes with an extension point:
+The PPX now accepts a string that looks like a normal recipe:
 
 ```ocaml
-let r = [%recipe
-  "Spaghetti al pomodoro"
-  (servings 4)
-  (ingredients
-    ("spaghetti" (g 500))
-    ("tomato purée" (ml 250))
-    ("salt" pinch))
-  (steps
-    "Boil the pasta."
-    "Heat the sauce.")
-]
+let r = [%recipe {|
+Spaghetti al pomodoro
+Servings: 4
+
+Ingredients:
+- 500 g spaghetti
+- 250 ml tomato purée
+- pinch salt
+- 10 g basil
+
+Steps:
+1. Bring a large pot of water to a boil and salt it.
+2. Cook the spaghetti according to package directions.
+3. Heat the tomato purée in a pan.
+4. Drain the pasta and combine with the sauce.
+5. Season and serve with fresh basil.
+|}]
 ```
 
 ## Build & run
@@ -22,5 +28,3 @@ let r = [%recipe
 dune build
 dune exec ./example.exe
 ```
-
-Requires OCaml + Dune. The PPX lives in `ppx/`.
