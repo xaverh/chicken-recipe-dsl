@@ -1,5 +1,6 @@
 open Recipe
 
+(* Pure recipe definition *)
 let spaghetti = [%recipe {|
 Spaghetti al pomodoro
 Servings: 4
@@ -18,8 +19,11 @@ Drain the pasta and combine with the sauce.
 Season and serve with fresh basil.
 |}]
 
-let () =
+(* Demo / driver code (not part of the recipe) *)
+let demo () =
   print_endline "Original:";
   print_endline (recipe_to_html spaghetti);
   print_endline "\n--- Scaled to 2x ---";
   print_endline (recipe_to_html (scale_recipe spaghetti 2.0))
+
+let () = demo ()
