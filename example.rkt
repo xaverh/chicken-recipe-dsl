@@ -1,16 +1,14 @@
 #lang racket/base
-
 (require "recipe.rkt")
 
-;; Pure recipe definition
 (define spaghetti
   (recipe "Spaghetti al pomodoro"
     (servings 4)
     (ingredients
-      ("spaghetti" (g 500))
-      ("tomato purée" (ml 250))
-      ("salt" pinch)
-      ("basil" (g 10)))
+      ("spaghetti" (quantity 500 "g" #f) #f #f #f #f)
+      ("tomato purée" (quantity 250 "ml" #f) #f #f #f #f)
+      ("salt" (quantity 1 "pinch" #t) #f #f #f #f)
+      ("basil" (quantity 10 "g" #f) #t #f #f #f))
     (steps
       "Bring a large pot of water to a boil and salt it."
       "Cook the spaghetti according to package directions."
