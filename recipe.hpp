@@ -3,10 +3,10 @@
 #include <vector>
 #include <variant>
 #include <sstream>
-#include <algorithm>
+#include <initializer_list>
 
 struct Quantity {
-  std::variant<double, std::string> value; // number or "pinch" etc.
+  std::variant<double, std::string> value;
   std::string unit;
 };
 
@@ -21,6 +21,20 @@ struct Recipe {
   std::vector<Ingredient> ingredients;
   std::vector<std::string> steps;
 };
+
+#define G(n) Quantity{static_cast<double>(n), "g"}
+#define ML(n) Quantity{static_cast<double>(n), "ml"}
+#define PINCH Quantity{"pinch", ""}
+#define TO_TASTE Quantity{"to taste", ""}
+
+#define ING(name, qty) Ingredient{name, qty}
+
+#define SERVINGS(n) , n
+#define INGREDIENTS(...) , std::vector<Ingredient>{__VA_ARGS__}
+#define STEPS(...) , std::vector<std::string>{__VA_ARGS__}
+
+#define RECIPE(name, ...) \
+  Recipe{name __VA_ARGS__}
 
 inline Quantity scale_quantity(const Quantity& q, double factor) {
   if (std::holds_alternative<double>(q.value))

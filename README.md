@@ -1,9 +1,20 @@
 # Recipe DSL — C++ branch
 
-Minimal C++17 port. Structs + functions.
+Uses preprocessor macros to approximate the original surface syntax.
 
-## Usage
+## Surface
 
-```bash
-g++ -std=c++17 example.cpp -o example && ./example
+```cpp
+auto r = RECIPE("Spaghetti al pomodoro",
+  SERVINGS(4),
+  INGREDIENTS(
+    ING("spaghetti", G(500)),
+    ING("tomato purée", ML(250)),
+    ING("salt", PINCH)
+  ),
+  STEPS(
+    "Boil the pasta.",
+    "Heat the sauce."
+  )
+);
 ```
