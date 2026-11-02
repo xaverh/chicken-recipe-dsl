@@ -17,12 +17,3 @@
       "Heat the tomato purée in a pan."
       "Drain the pasta and combine with the sauce."
       "Season and serve with fresh basil.")))
-
-;; Demo / driver code (not part of the recipe)
-(define (demo)
-  (displayln "Original:")
-  (displayln (recipe->html spaghetti))
-  (displayln "\n--- Scaled to 2x ---")
-  (displayln (recipe->html (scale-recipe spaghetti 2))))
-
-(demo)
