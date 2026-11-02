@@ -1,7 +1,38 @@
-// JavaScript recipe DSL skeleton
+// JavaScript recipe DSL — builder + tagged-template style approximating macros
 
-export function makeRecipe(name, servings, ingredients, steps) {
-  return { name, servings, ingredients, steps };
+function g(n) { return ['g', n]; }
+function ml(n) { return ['ml', n]; }
+const pinch = 'pinch';
+const toTaste = 'to-taste';
+
+function ing(strings, ...values) {
+  const name = strings[0];
+  return (qty) => [name, qty];
+}
+
+class RecipeBuilder {
+  constructor(name) {
+    this._name = name;
+    this._servings = 1;
+    this._ingredients = [];
+    this._steps = [];
+  }
+  servings(n) { this._servings = n; return this; }
+  ingredients(...ings) { this._ingredients = ings; return this; }
+  steps(...steps) { this._steps = steps; return this; }
+  build() {
+    return {
+      name: this._name,
+      servings: this._servings,
+      ingredients: this._ingredients,
+      steps: this._steps
+    };
+  }
+}
+
+export function recipe(strings, ...values) {
+  const name = strings[0];
+  return new RecipeBuilder(name);
 }
 
 function isNumericQuantity(q) {
@@ -31,3 +62,5 @@ export function recipeToHtml(r) {
   const stps = r.steps.map(s => `<li>${s}</li>`).join('');
   return `<article><h1>${r.name}</h1><p>Servings: ${r.servings}</p><h2>Ingredients</h2><ul>${ings}</ul><h2>Steps</h2><ol>${stps}</ol></article>`;
 }
+
+export { g, ml, pinch, toTaste, ing };
