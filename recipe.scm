@@ -9,6 +9,11 @@
           (chicken port)
           srfi-1)
 
+  ;; Allow the actual λ character as a synonym for lambda
+  (define-syntax λ
+    (syntax-rules ()
+      ((_ . rest) (lambda . rest))))
+
   ;; Records
   (define-record-type recipe
     (make-recipe name servings ingredients steps)
@@ -33,7 +38,7 @@
     (make-recipe
       (recipe-name r)
       (* (recipe-servings r) factor)
-      (map (lambda (ing)
+      (map (λ (ing)
              (cons (car ing)
                    (scale-quantity (cdr ing) factor)))
            (recipe-ingredients r))
@@ -42,9 +47,9 @@
   ;; Macro: ingredients
   (define-syntax ingredients
     (er-macro-transformer
-     (lambda (form rename compare)
+     (λ (form rename compare)
        (let ((pairs (cdr form)))
-         (unless (every (lambda (p)
+         (unless (every (λ (p)
                           (and (list? p)
                                (= (length p) 2)
                                (string? (car p))))
@@ -52,7 +57,7 @@
            (syntax-error 'ingredients
                          "expected (\"name\" quantity) pairs"
                          form))
-         `(list ,@(map (lambda (p)
+         `(list ,@(map (λ (p)
                          `(cons ,(car p) ,(cadr p)))
                        pairs))))))
 
@@ -65,7 +70,7 @@
   ;; Macro: recipe
   (define-syntax recipe
     (er-macro-transformer
-     (lambda (form rename compare)
+     (λ (form rename compare)
        (let ((name (cadr form))
              (rest (cddr form)))
          ;; very simple extraction — improve later
@@ -106,7 +111,7 @@
        (h2 "Ingredients")
        (ul ,@(map ingredient->sxml (recipe-ingredients r)))
        (h2 "Steps")
-       (ol ,@(map (lambda (s) `(li ,s)) (recipe-steps r)))))
+       (ol ,@(map (λ (s) `(li ,s)) (recipe-steps r)))))
 
   ;; Very simple HTML emitter (no escaping for skeleton)
   (define (sxml->html s)
