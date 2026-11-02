@@ -1,17 +1,13 @@
-# Chicken Recipe DSL
+# Recipe DSL — Chez Scheme branch
 
-Minimal working skeleton of a Chicken Scheme DSL for recipes.
+Minimal Chez Scheme port of the recipe DSL.
 
-## Features
-- Nice surface syntax via macros
-- Structured data (records)
-- Recipe scaling
-- SXML generation for HTML publishing
+Chez has excellent R6RS support and native Unicode. λ is defined as a synonym.
 
 ## Usage
 
 ```scheme
-(import recipe)
+(load "recipe.ss")
 
 (define r
   (recipe "Spaghetti al pomodoro"
@@ -22,16 +18,9 @@ Minimal working skeleton of a Chicken Scheme DSL for recipes.
       ("salt" pinch))
     (steps
       "Boil the pasta."
-      "Heat the sauce."
-      "Combine and season.")))
+      "Heat the sauce.")))
 
 (recipe->html (scale-recipe r 2))
 ```
 
-## Dependencies
-- CHICKEN Scheme 5+
-- Optional: `sxml-transforms` or `chiccup` for richer HTML (the skeleton includes a simple SXML emitter)
-
-## Files
-- `recipe.scm` — the module
-- `example.scm` — runnable example
+Run with Chez Scheme (`scheme` or `petite`).
