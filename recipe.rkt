@@ -31,7 +31,7 @@
   (make-recipe
    (recipe-name r)
    (* (recipe-servings r) factor)
-   (map (lambda (ing)
+   (map (λ (ing)
           (cons (car ing)
                 (scale-quantity (cdr ing) factor)))
         (recipe-ingredients r))
@@ -99,7 +99,7 @@
      (h2 "Ingredients")
      (ul ,@(map ingredient->sxml (recipe-ingredients r)))
      (h2 "Steps")
-     (ol ,@(map (lambda (s) `(li ,s)) (recipe-steps r)))))
+     (ol ,@(map (λ (s) `(li ,s)) (recipe-steps r)))))
 
 (define (sxml->html s)
   (cond
