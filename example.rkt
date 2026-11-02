@@ -2,6 +2,7 @@
 
 (require "recipe.rkt")
 
+;; Pure recipe definition
 (define spaghetti
   (recipe "Spaghetti al pomodoro"
     (servings 4)
@@ -17,7 +18,11 @@
       "Drain the pasta and combine with the sauce."
       "Season and serve with fresh basil.")))
 
-(displayln "Original:")
-(displayln (recipe->html spaghetti))
-(displayln "\n--- Scaled to 2x ---")
-(displayln (recipe->html (scale-recipe spaghetti 2)))
+;; Demo / driver code (not part of the recipe)
+(define (demo)
+  (displayln "Original:")
+  (displayln (recipe->html spaghetti))
+  (displayln "\n--- Scaled to 2x ---")
+  (displayln (recipe->html (scale-recipe spaghetti 2))))
+
+(demo)
