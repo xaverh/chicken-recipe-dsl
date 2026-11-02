@@ -1,63 +1,67 @@
-;; Chez Scheme recipe DSL skeleton
-;; λ synonym
+;; Chez Scheme recipe DSL with Cooklang MVP features
 (define-syntax λ
   (syntax-rules ()
     ((_ . rest) (lambda . rest))))
 
-;; Records
-(define-record-type recipe
-  (fields name servings ingredients steps))
+(define-record-type quantity
+  (fields value unit locked?))
 
-;; Helpers
-(define (quantity-numeric? q)
-  (and (pair? q) (number? (cadr q))))
+(define-record-type ingredient
+  (fields name quantity optional? hidden? alias reference?))
+
+(define-record-type cookware
+  (fields name optional?))
+
+(define-record-type timer
+  (fields name duration unit))
+
+(define-record-type recipe
+  (fields name servings metadata ingredients cookware timers steps sections))
 
 (define (scale-quantity q factor)
-  (cond
-    ((quantity-numeric? q)
-     (list (car q) (* (cadr q) factor)))
-    (else q)))
+  (if (or (not q) (quantity-locked? q) (not (number? (quantity-value q))))
+      q
+      (make-quantity (* (quantity-value q) factor) (quantity-unit q) #f)))
 
 (define (scale-recipe r factor)
   (make-recipe
     (recipe-name r)
     (* (recipe-servings r) factor)
+    (recipe-metadata r)
     (map (λ (ing)
-           (cons (car ing)
-                 (scale-quantity (cdr ing) factor)))
+           (make-ingredient (ingredient-name ing)
+                            (scale-quantity (ingredient-quantity ing) factor)
+                            (ingredient-optional? ing)
+                            (ingredient-hidden? ing)
+                            (ingredient-alias ing)
+                            (ingredient-reference? ing)))
          (recipe-ingredients r))
-    (recipe-steps r)))
+    (recipe-cookware r)
+    (recipe-timers r)
+    (recipe-steps r)
+    (recipe-sections r)))
 
-;; Macros
 (define-syntax ingredients
   (syntax-rules ()
-    ((_ (name q) ...)
-     (list (cons name (quote q)) ...))))
-
-(define-syntax steps
-  (syntax-rules ()
-    ((_ s ...)
-     (list s ...))))
+    ((_ (name qty opt? hid? ali? ref?) ...)
+     (list (make-ingredient name qty opt? hid? ali? ref?) ...))))
 
 (define-syntax recipe
   (syntax-rules (servings ingredients steps)
     ((_ name (servings n) (ingredients ings) (steps stps))
-     (make-recipe name n ings stps))
-    ((_ name (ingredients ings) (steps stps))
-     (make-recipe name 1 ings stps))))
+     (make-recipe name n '() ings '() '() stps '()))))
 
-;; SXML / HTML
 (define (quantity->sxml q)
-  (cond
-    ((quantity-numeric? q)
-     `(span ,(number->string (cadr q)) " " ,(symbol->string (car q))))
-    ((symbol? q)
-     `(span ,(symbol->string q)))
-    (else
-     `(span ,(format "~a" q)))))
+  (if (not q) ""
+      `(span ,(if (number? (quantity-value q))
+                  (number->string (quantity-value q))
+                  (format "~a" (quantity-value q)))
+             " " ,(or (quantity-unit q) ""))))
 
 (define (ingredient->sxml ing)
-  `(li ,(car ing) ": " ,(quantity->sxml (cdr ing))))
+  `(li ,(if (ingredient-optional? ing) "(optional) " "")
+       ,(or (ingredient-alias ing) (ingredient-name ing))
+       ": " ,(quantity->sxml (ingredient-quantity ing))))
 
 (define (recipe->sxml r)
   `(article
@@ -74,12 +78,10 @@
     ((number? s) (number->string s))
     ((symbol? s) (symbol->string s))
     ((pair? s)
-     (let ((tag (car s))
-           (body (cdr s)))
-       (string-append
-        "<" (symbol->string tag) ">"
-        (apply string-append (map sxml->html body))
-        "</" (symbol->string tag) ">")))
+     (let ((tag (car s)) (body (cdr s)))
+       (string-append "<" (symbol->string tag) ">"
+                      (apply string-append (map sxml->html body))
+                      "</" (symbol->string tag) ">")))
     (else "")))
 
 (define (recipe->html r)
