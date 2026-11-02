@@ -1,37 +1,26 @@
-# Chicken Recipe DSL
+# Recipe DSL — Emacs Lisp branch
 
-Minimal working skeleton of a Chicken Scheme DSL for recipes.
+Minimal Emacs Lisp port of the recipe DSL.
 
-## Features
-- Nice surface syntax via macros
-- Structured data (records)
-- Recipe scaling
-- SXML generation for HTML publishing
+Uses cl-defstruct (from cl-lib), defmacro, and a λ synonym.
 
 ## Usage
 
-```scheme
-(import recipe)
+In Emacs:
 
-(define r
+```elisp
+(load "recipe.el")
+
+(setq r
   (recipe "Spaghetti al pomodoro"
-    (servings 4)
-    (ingredients
-      ("spaghetti" (g 500))
-      ("tomato purée" (ml 250))
-      ("salt" pinch))
-    (steps
-      "Boil the pasta."
-      "Heat the sauce."
-      "Combine and season.")))
+    :servings 4
+    :ingredients '(("spaghetti" (g 500))
+                   ("tomato purée" (ml 250))
+                   ("salt" pinch))
+    :steps '("Boil the pasta."
+             "Heat the sauce.")))
 
 (recipe->html (scale-recipe r 2))
 ```
 
-## Dependencies
-- CHICKEN Scheme 5+
-- Optional: `sxml-transforms` or `chiccup` for richer HTML (the skeleton includes a simple SXML emitter)
-
-## Files
-- `recipe.scm` — the module
-- `example.scm` — runnable example
+Or evaluate in a buffer.
