@@ -1,4 +1,4 @@
-;; Example for Chez
+;; Pure recipe definition
 (load "recipe.ss")
 
 (define spaghetti
@@ -16,9 +16,13 @@
       "Drain the pasta and combine with the sauce."
       "Season and serve with fresh basil.")))
 
-(display "Original:\n")
-(display (recipe->html spaghetti))
-(newline)
-(display "\n--- Scaled to 2x ---\n")
-(display (recipe->html (scale-recipe spaghetti 2)))
-(newline)
+;; Demo / driver code (not part of the recipe)
+(define (demo)
+  (display "Original:\n")
+  (display (recipe->html spaghetti))
+  (newline)
+  (display "\n--- Scaled to 2x ---\n")
+  (display (recipe->html (scale-recipe spaghetti 2)))
+  (newline))
+
+(demo)
