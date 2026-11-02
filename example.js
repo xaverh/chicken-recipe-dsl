@@ -1,7 +1,7 @@
-import { recipe, g, ml, pinch, ing, scaleRecipe, recipeToHtml } from './recipe.js';
+import { recipe, g, ml, pinch, ing } from './recipe.js';
 
 // Pure recipe definition
-const spaghetti = recipe`Spaghetti al pomodoro`
+export const spaghetti = recipe`Spaghetti al pomodoro`
   .servings(4)
   .ingredients(
     ing`spaghetti`(g(500)),
@@ -17,13 +17,3 @@ const spaghetti = recipe`Spaghetti al pomodoro`
     "Season and serve with fresh basil."
   )
   .build();
-
-// Demo / driver code (not part of the recipe)
-function demo() {
-  console.log("Original:");
-  console.log(recipeToHtml(spaghetti));
-  console.log("\n--- Scaled to 2x ---");
-  console.log(recipeToHtml(scaleRecipe(spaghetti, 2)));
-}
-
-demo();
