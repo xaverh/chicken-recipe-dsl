@@ -1,37 +1,23 @@
-# Chicken Recipe DSL
+# Recipe DSL — OCaml branch
 
-Minimal working skeleton of a Chicken Scheme DSL for recipes.
-
-## Features
-- Nice surface syntax via macros
-- Structured data (records)
-- Recipe scaling
-- SXML generation for HTML publishing
+Minimal OCaml port. Algebraic data types + functions for scaling and HTML.
 
 ## Usage
 
-```scheme
-(import recipe)
+```ocaml
+#use "recipe.ml";;
 
-(define r
-  (recipe "Spaghetti al pomodoro"
-    (servings 4)
-    (ingredients
-      ("spaghetti" (g 500))
-      ("tomato purée" (ml 250))
-      ("salt" pinch))
-    (steps
-      "Boil the pasta."
-      "Heat the sauce."
-      "Combine and season.")))
+let r = recipe "Spaghetti al pomodoro"
+  ~servings:4
+  ~ingredients:[
+    ("spaghetti", G 500);
+    ("tomato purée", Ml 250);
+    ("salt", Pinch)
+  ]
+  ~steps:[
+    "Boil the pasta.";
+    "Heat the sauce."
+  ];;
 
-(recipe->html (scale-recipe r 2))
+print_endline (recipe_to_html (scale_recipe r 2.0));;
 ```
-
-## Dependencies
-- CHICKEN Scheme 5+
-- Optional: `sxml-transforms` or `chiccup` for richer HTML (the skeleton includes a simple SXML emitter)
-
-## Files
-- `recipe.scm` — the module
-- `example.scm` — runnable example
