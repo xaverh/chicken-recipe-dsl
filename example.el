@@ -1,5 +1,4 @@
-;;; example.el --- Example for the Emacs Lisp recipe DSL
-
+;;; Pure recipe definition
 (load "recipe.el")
 
 (setq spaghetti
@@ -15,5 +14,9 @@
              "Drain the pasta and combine with the sauce."
              "Season and serve with fresh basil.")))
 
-(message "Original:\n%s" (recipe->html spaghetti))
-(message "\n--- Scaled to 2x ---\n%s" (recipe->html (scale-recipe spaghetti 2)))
+;;; Demo / driver code (not part of the recipe)
+(defun demo ()
+  (message "Original:\n%s" (recipe->html spaghetti))
+  (message "\n--- Scaled to 2x ---\n%s" (recipe->html (scale-recipe spaghetti 2))))
+
+(demo)
