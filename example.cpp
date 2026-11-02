@@ -1,5 +1,4 @@
 #include "recipe.hpp"
-#include <iostream>
 
 // Pure recipe definition
 auto make_spaghetti() {
@@ -19,11 +18,4 @@ auto make_spaghetti() {
       "Season and serve with fresh basil."
     )
   );
-}
-
-// Demo / driver code (not part of the recipe)
-int main() {
-  auto spaghetti = make_spaghetti();
-  std::cout << "Original:\n" << recipe_to_html(spaghetti) << "\n";
-  std::cout << "\n--- Scaled to 2x ---\n" << recipe_to_html(scale_recipe(spaghetti, 2.0)) << "\n";
 }
