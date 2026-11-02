@@ -13,10 +13,3 @@
              "Heat the tomato purée in a pan."
              "Drain the pasta and combine with the sauce."
              "Season and serve with fresh basil.")))
-
-;;; Demo / driver code (not part of the recipe)
-(defun demo ()
-  (message "Original:\n%s" (recipe->html spaghetti))
-  (message "\n--- Scaled to 2x ---\n%s" (recipe->html (scale-recipe spaghetti 2))))
-
-(demo)
