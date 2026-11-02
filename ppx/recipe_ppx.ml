@@ -1,7 +1,8 @@
 open Ppxlib
 
 (* Simple line-based parser for a natural recipe format.
-   This is a skeleton; a production version would use a proper parser combinator. *)
+   Ingredients use the real bullet character U+2022 (•).
+   Steps are plain lines with no numbering. *)
 
 let parse_recipe ~loc src =
   let open Ast_builder.Default in
@@ -27,24 +28,21 @@ let parse_recipe ~loc src =
     | _ :: rest -> parse_section header acc rest
     | [] -> (List.rev acc, [])
   and parse_items = function
-    | line :: rest when String.starts_with ~prefix:"-" line || String.starts_with ~prefix:"1." line || String.starts_with ~prefix:"2." line || String.starts_with ~prefix:"3." line || String.starts_with ~prefix:"4." line || String.starts_with ~prefix:"5." line || String.starts_with ~prefix:"6." line || String.starts_with ~prefix:"7." line || String.starts_with ~prefix:"8." line || String.starts_with ~prefix:"9." line ->
-      let item = line |> String.trim |> (fun s ->
-        if String.starts_with ~prefix:"-" s then String.sub s 1 (String.length s - 1) |> String.trim
-        else
-          try
-            let idx = String.index s '.' in
-            String.sub s (idx + 1) (String.length s - idx - 1) |> String.trim
-          with Not_found -> s
-      ) in
+    | line :: rest when String.starts_with ~prefix:"•" line ->
+      let item = String.trim (String.sub line 1 (String.length line - 1)) in
       let (items, rest') = parse_items rest in
       (item :: items, rest')
+    | line :: rest when not (String.starts_with ~prefix:"Steps:" line) && not (String.starts_with ~prefix:"Ingredients:" line) && not (String.starts_with ~prefix:"Servings:" line) ->
+      (* plain step line *)
+      let (items, rest') = parse_items rest in
+      (line :: items, rest')
     | rest -> ([], rest)
   in
   let (name, rest1) = parse_name lines in
   let (servings, rest2) = parse_servings 1.0 rest1 in
   let (ing_lines, rest3) = parse_section "ingredients:" [] rest2 in
   let (step_lines, _) = parse_section "steps:" [] rest3 in
-  (* Very rough quantity parsing for the skeleton *)
+  (* Rough quantity parsing *)
   let parse_ing line =
     let parts = String.split_on_char ' ' line in
     match parts with
