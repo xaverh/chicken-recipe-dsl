@@ -1,4 +1,4 @@
-(* OCaml recipe DSL skeleton *)
+(* OCaml recipe DSL — combinator-style surface approximating macros *)
 
 type quantity =
   | G of float
@@ -6,17 +6,37 @@ type quantity =
   | Pinch
   | ToTaste
 
-type ingredient = string * quantity
+type clause =
+  | Servings of float
+  | Ingredients of (string * quantity) list
+  | Steps of string list
 
 type recipe = {
   name : string;
   servings : float;
-  ingredients : ingredient list;
+  ingredients : (string * quantity) list;
   steps : string list;
 }
 
-let recipe name ~servings ~ingredients ~steps =
-  { name; servings; ingredients; steps }
+let g n = G n
+let ml n = Ml n
+let pinch = Pinch
+let to_taste = ToTaste
+
+let servings n = Servings n
+let ingredients xs = Ingredients xs
+let steps xs = Steps xs
+
+let recipe name clauses =
+  let servings = ref 1.0 in
+  let ings = ref [] in
+  let stps = ref [] in
+  List.iter (function
+    | Servings n -> servings := n
+    | Ingredients xs -> ings := xs
+    | Steps xs -> stps := xs
+  ) clauses;
+  { name; servings = !servings; ingredients = !ings; steps = !stps }
 
 let scale_quantity q factor =
   match q with

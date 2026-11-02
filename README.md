@@ -1,23 +1,21 @@
 # Recipe DSL — OCaml branch
 
-Minimal OCaml port. Algebraic data types + functions for scaling and HTML.
+Attempt at a more DSL-like surface using a small combinator / quotation style
+(OCaml has no built-in hygienic macros comparable to Scheme; PPX would be needed for a true macro).
 
-## Usage
+## Surface
 
 ```ocaml
-#use "recipe.ml";;
-
 let r = recipe "Spaghetti al pomodoro"
-  ~servings:4
-  ~ingredients:[
-    ("spaghetti", G 500);
-    ("tomato purée", Ml 250);
-    ("salt", Pinch)
+  [ servings 4;
+    ingredients [
+      ("spaghetti", g 500);
+      ("tomato purée", ml 250);
+      ("salt", pinch)
+    ];
+    steps [
+      "Boil the pasta.";
+      "Heat the sauce."
+    ]
   ]
-  ~steps:[
-    "Boil the pasta.";
-    "Heat the sauce."
-  ];;
-
-print_endline (recipe_to_html (scale_recipe r 2.0));;
 ```
