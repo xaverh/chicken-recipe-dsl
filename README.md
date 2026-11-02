@@ -1,37 +1,20 @@
-# Chicken Recipe DSL
+# Chicken Recipe DSL — Racket branch
 
-Minimal working skeleton of a Chicken Scheme DSL for recipes.
+This branch contains a Racket port of the recipe DSL, demonstrating the advantages of Racket’s language-oriented features over the Chicken version on `main`.
 
-## Features
-- Nice surface syntax via macros
-- Structured data (records)
-- Recipe scaling
-- SXML generation for HTML publishing
+## Why Racket is better here
 
-## Usage
-
-```scheme
-(import recipe)
-
-(define r
-  (recipe "Spaghetti al pomodoro"
-    (servings 4)
-    (ingredients
-      ("spaghetti" (g 500))
-      ("tomato purée" (ml 250))
-      ("salt" pinch))
-    (steps
-      "Boil the pasta."
-      "Heat the sauce."
-      "Combine and season.")))
-
-(recipe->html (scale-recipe r 2))
-```
-
-## Dependencies
-- CHICKEN Scheme 5+
-- Optional: `sxml-transforms` or `chiccup` for richer HTML (the skeleton includes a simple SXML emitter)
+See the comparison notes below and the code in `recipe.rkt`.
 
 ## Files
-- `recipe.scm` — the module
-- `example.scm` — runnable example
+- `recipe.rkt` — the DSL (syntax-parse macros, contracts-friendly, good error messages)
+- `example.rkt` — runnable example
+- `racket-vs-chicken.md` — short comparison
+
+## Quick start
+
+```bash
+racket example.rkt
+```
+
+Or in DrRacket: open `example.rkt` and Run.
