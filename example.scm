@@ -1,6 +1,4 @@
-;; Example usage
-;; Run with: csi -s example.scm
-
+;; Pure recipe definition
 (import recipe)
 
 (define spaghetti
@@ -18,7 +16,11 @@
       "Drain the pasta and combine with the sauce."
       "Season and serve with fresh basil.")))
 
-(print "Original:")
-(print (recipe->html spaghetti))
-(print "\n--- Scaled to 2x ---")
-(print (recipe->html (scale-recipe spaghetti 2)))
+;; Demo / driver code (not part of the recipe)
+(define (demo)
+  (print "Original:")
+  (print (recipe->html spaghetti))
+  (print "\n--- Scaled to 2x ---")
+  (print (recipe->html (scale-recipe spaghetti 2))))
+
+(demo)
